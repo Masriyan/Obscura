@@ -72,10 +72,10 @@ Then enter a target (e.g. `example.com`), pick a profile, and hit **Start Scan**
 ## Screenshots / what you get
 
 ```
-┌─ Dashboard ──────────────────────────────────────────────┐
+┌─ Dashboard ───────────────────────────────────────────────┐
 │  Target: example.com     Profile: [Quick][Full][BugBounty]│
-│  Modules: select all ✓                   [ > Start Scan ]  │
-└──────────────────────────────────────────────────────────┘
+│  Modules: select all ✓                   [ > Start Scan ] │
+└───────────────────────────────────────────────────────────┘
 ┌─ Results ────────────────────────────────────────────────┐
 │   62   Risk / 100   ● High        Crit 0  High 2  Med 2   │
 │   ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁                           │
