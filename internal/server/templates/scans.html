@@ -1,0 +1,18 @@
+{{define "title"}}Obscura Scan — History{{end}}
+{{define "content"}}
+<div class="page-head"><div><h1>Scan History</h1><p>All completed scans.</p></div></div>
+<div class="card">
+  {{if .Scans}}
+  <table class="tbl">
+    <thead><tr><th>Target</th><th style="width:120px">Scan</th><th style="width:160px">Date</th></tr></thead>
+    <tbody>
+    {{range .Scans}}
+      <tr><td><a href="/view/{{.ID}}">{{.URL}}</a></td><td class="dim">#{{.ID}}</td><td class="dim">{{.Date}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No scans yet. <a href="/">Run one →</a></p>
+  {{end}}
+</div>
+{{end}}

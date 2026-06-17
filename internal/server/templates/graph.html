@@ -1,0 +1,64 @@
+{{define "title"}}Obscura Scan — Graph #{{.ScanID}}{{end}}
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Attack Surface Graph</h1>
+    <p>{{.Target}} · {{.NodeCount}} nodes · {{.EdgeCount}} relationships</p>
+  </div>
+  <a class="btn ghost sm" href="/view/{{.ScanID}}">{{icon "chevron"}} Back to scan</a>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="display:flex;gap:16px;padding:10px 16px;flex-wrap:wrap;font-size:.78rem;color:var(--text-3);border-bottom:1px solid var(--border)">
+    <span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#7c74ff"></i> Target</span>
+    <span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4c82f7"></i> Subdomain</span>
+    <span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#30a46c"></i> IP</span>
+    <span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#d8a01e"></i> ASN</span>
+    <span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef7234"></i> Cert issuer</span>
+    <span class="dim" style="margin-left:auto">drag nodes · scroll to zoom</span>
+  </div>
+  <canvas id="g" style="width:100%;height:600px;display:block;cursor:grab"></canvas>
+</div>
+
+<script>
+const DATA = {{.GraphJSON}};
+const COLORS = {target:"#7c74ff", subdomain:"#4c82f7", ip:"#30a46c", asn:"#d8a01e", issuer:"#ef7234"};
+const SIZES  = {target:11, subdomain:7, ip:6, asn:8, issuer:6};
+const cv = document.getElementById('g'), ctx = cv.getContext('2d');
+let W,H,DPR; function resize(){ DPR=devicePixelRatio||1; W=cv.clientWidth; H=cv.clientHeight; cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);} resize(); addEventListener('resize',resize);
+
+const nodes = DATA.nodes.map(n=>({...n, x:W/2+(Math.random()-.5)*200, y:H/2+(Math.random()-.5)*200, vx:0, vy:0}));
+const idx = {}; nodes.forEach((n,i)=>idx[n.id]=i);
+const edges = (DATA.edges||[]).filter(e=>idx[e.source]!=null && idx[e.target]!=null);
+let view={x:0,y:0,k:1}, drag=null, pan=null;
+
+function tick(){
+  // repulsion
+  for(let i=0;i<nodes.length;i++){ for(let j=i+1;j<nodes.length;j++){
+    const a=nodes[i],b=nodes[j]; let dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||1; const f=2600/(d*d);
+    dx/=d;dy/=d; a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f;
+  }}
+  // springs
+  edges.forEach(e=>{ const a=nodes[idx[e.source]],b=nodes[idx[e.target]]; let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1; const f=(d-90)*0.02; dx/=d;dy/=d; a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f; });
+  // centering + integrate
+  nodes.forEach(n=>{ if(n===drag) return; n.vx+=(W/2-n.x)*0.0008; n.vy+=(H/2-n.y)*0.0008; n.vx*=.86;n.vy*=.86; n.x+=n.vx;n.y+=n.vy; });
+}
+function draw(){
+  ctx.clearRect(0,0,W,H); ctx.save(); ctx.translate(view.x,view.y); ctx.scale(view.k,view.k);
+  ctx.strokeStyle="rgba(255,255,255,.12)"; ctx.lineWidth=1;
+  edges.forEach(e=>{ const a=nodes[idx[e.source]],b=nodes[idx[e.target]]; ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke(); });
+  nodes.forEach(n=>{ const r=SIZES[n.type]||6, c=COLORS[n.type]||"#8b8d98";
+    ctx.beginPath();ctx.arc(n.x,n.y,r,0,7);ctx.fillStyle=c;ctx.fill();
+    ctx.fillStyle="rgba(230,237,246,.82)";ctx.font="11px system-ui";ctx.fillText(n.label,n.x+r+3,n.y+4);
+  });
+  ctx.restore();
+}
+function loop(){ tick();draw();requestAnimationFrame(loop); } loop();
+
+function toWorld(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left-view.x)/view.k, y:(e.clientY-r.top-view.y)/view.k}; }
+cv.addEventListener('mousedown',e=>{ const p=toWorld(e); let hit=null; nodes.forEach(n=>{ if(Math.hypot(n.x-p.x,n.y-p.y)<10) hit=n; }); if(hit){drag=hit;cv.style.cursor='grabbing';} else {pan={x:e.clientX-view.x,y:e.clientY-view.y};cv.style.cursor='grabbing';} });
+addEventListener('mousemove',e=>{ if(drag){const p=toWorld(e);drag.x=p.x;drag.y=p.y;drag.vx=drag.vy=0;} else if(pan){view.x=e.clientX-pan.x;view.y=e.clientY-pan.y;} });
+addEventListener('mouseup',()=>{drag=null;pan=null;cv.style.cursor='grab';});
+cv.addEventListener('wheel',e=>{e.preventDefault(); const f=e.deltaY<0?1.1:.9; view.k=Math.max(.2,Math.min(3,view.k*f));},{passive:false});
+</script>
+{{end}}

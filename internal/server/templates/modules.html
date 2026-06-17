@@ -1,0 +1,16 @@
+{{define "title"}}Obscura Scan — Modules{{end}}
+{{define "content"}}
+<div class="page-head"><div><h1>Modules</h1><p>{{len .Modules}} recon, intel &amp; analysis modules.</p></div></div>
+<div class="grid cols-2">
+  {{range .Modules}}
+  <div class="card" style="margin-bottom:0">
+    <div class="mod-head">
+      <div class="name">{{title .Name}}</div>
+      <span class="cat-tag">{{.Category}}</span>
+    </div>
+    <p class="muted" style="margin:.2rem 0 .6rem;font-size:.88rem">{{.Description}}</p>
+    {{if .RequiredKey}}<span class="badge sev-medium" style="text-transform:none">needs {{.RequiredKey}}</span>{{else}}<span class="badge sev-low" style="text-transform:none">no key required</span>{{end}}
+  </div>
+  {{end}}
+</div>
+{{end}}

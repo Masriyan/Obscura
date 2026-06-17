@@ -1,0 +1,70 @@
+{{define "title"}}Obscura Scan — Dashboard{{end}}
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Threat Hunter &amp; Attack Surface Management</h1>
+    <p>Run OSINT/recon modules against a target. {{.ModuleCount}} modules available.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>{{icon "target"}} New Scan</h2>
+  <form method="post" action="/scan">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <label class="fld">Target (domain, URL, or IP)</label>
+    <input class="input" type="text" name="target" placeholder="example.com" required autofocus>
+
+    <div style="display:flex;gap:12px;align-items:center;margin:14px 0">
+      <select class="input" name="mode" style="width:auto">
+        <option value="defensive">Defensive</option>
+        <option value="semi-offensive">Semi-offensive</option>
+      </select>
+      <button class="btn" type="submit">{{icon "target"}} Start Scan</button>
+      <label style="display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.85rem;margin-left:auto;cursor:pointer">
+        <input type="checkbox" id="toggle-all" checked onclick="document.querySelectorAll('input[name=modules]').forEach(c=>c.checked=this.checked)"> select all
+      </label>
+    </div>
+
+    {{if .Templates}}
+    <label class="fld">Profiles</label>
+    <div style="margin-bottom:14px">
+      {{range .Templates}}
+      <button type="button" class="chip" style="cursor:pointer" title="{{.Desc}}" onclick="applyTemplate('{{.ModulesCSV}}','{{.Mode}}')">{{.Name}}</button>
+      {{end}}
+      <button type="button" class="chip" style="cursor:pointer" onclick="applyTemplate('','defensive')">All</button>
+    </div>
+    {{end}}
+
+    <label class="fld">Modules</label>
+    <div id="module-list">
+      {{range .Modules}}
+      <label class="chip" style="cursor:pointer">
+        <input type="checkbox" name="modules" value="{{.Name}}" checked> {{.Name}}
+        <span class="dim">· {{.Category}}</span>
+      </label>
+      {{end}}
+    </div>
+  </form>
+</div>
+<script>
+  function applyTemplate(csv, mode){
+    const set = csv ? new Set(csv.split(',')) : null;
+    document.querySelectorAll('#module-list input[name=modules]').forEach(c=>{ c.checked = set ? set.has(c.value) : true; });
+    const m = document.querySelector('select[name=mode]'); if (m && mode) m.value = mode;
+  }
+</script>
+
+{{if .RecentScans}}
+<div class="card">
+  <h2>{{icon "history"}} Recent Scans</h2>
+  <table class="tbl">
+    <thead><tr><th>Target</th><th style="width:120px">Scan</th><th style="width:150px">Date</th></tr></thead>
+    <tbody>
+    {{range .RecentScans}}
+      <tr><td><a href="/view/{{.ID}}">{{.URL}}</a></td><td class="dim">#{{.ID}}</td><td class="dim">{{.Date}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
+{{end}}

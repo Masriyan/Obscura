@@ -1,0 +1,20 @@
+{{define "title"}}Obscura Scan — Scanning{{end}}
+{{define "content"}}
+<div class="page-head"><div><h1>Scanning {{.Target}}</h1><p>Task <code>{{.TaskID}}</code></p></div></div>
+<div class="card">
+  <div hx-ext="sse" sse-connect="/stream/{{.TaskID}}">
+    <div sse-swap="progress" hx-swap="innerHTML">
+      <div><span class="pulse"></span> Starting scan…</div>
+    </div>
+    <div sse-swap="done" hx-swap="innerHTML"></div>
+  </div>
+  <p class="dim" style="margin-top:14px;font-size:.82rem">
+    If progress stalls, <a href="/view/by-task/{{.TaskID}}">open results directly</a>.
+  </p>
+</div>
+<script>
+  document.body.addEventListener('sse:done', function(e){
+    try { var d = JSON.parse(e.detail.data); if (d.scan_id) window.location='/view/'+d.scan_id; } catch(_){}
+  });
+</script>
+{{end}}

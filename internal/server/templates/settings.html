@@ -1,0 +1,68 @@
+{{define "title"}}Obscura Scan — Settings{{end}}
+{{define "content"}}
+<div class="page-head"><div><h1>Settings</h1><p>Configuration is read-only here. Set values via environment variables or the <code>.env</code> file.</p></div></div>
+
+<div class="grid cols-2">
+  <div class="card" style="margin-bottom:0">
+    <h3>{{icon "shield"}} Application</h3>
+    <div class="spec">
+      <div class="k">Version</div><div class="v mono">{{.App.Version}}</div>
+      <div class="k">Host</div><div class="v mono">{{.App.Host}}</div>
+      <div class="k">Port</div><div class="v mono">{{.App.Port}}</div>
+      <div class="k">Database</div><div class="v mono">{{.App.DBPath}}</div>
+      <div class="k">Cache TTL</div><div class="v mono">{{.App.CacheTTL}}s</div>
+      <div class="k">Allow Internal</div><div class="v">{{if .App.AllowInternal}}<span class="badge sev-high">enabled</span>{{else}}<span class="badge sev-low">deny (default)</span>{{end}}</div>
+      <div class="k">Alert Threshold</div><div class="v mono">{{.App.AlertThreshold}}</div>
+      <div class="k">Max Concurrent</div><div class="v mono">{{.App.MaxConcurrentScans}}</div>
+      <div class="k">Modules</div><div class="v mono">{{.ModuleCount}}</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:0">
+    <h3>{{icon "sparkle"}} AI Providers</h3>
+    <div class="spec">
+      <div class="k">Active</div><div class="v"><span class="badge sev-low">{{index .AIStatus "active_provider"}}</span></div>
+      <div class="k">Primary</div><div class="v mono">{{index .AIStatus "primary_provider"}}</div>
+    </div>
+    <table class="tbl" style="margin-top:12px"><tbody>
+    {{range .AI}}<tr><td>{{.Name}}</td><td class="mono dim">{{.Env}}</td><td style="text-align:right">{{if .Set}}<span class="badge sev-low">{{.Masked}}</span>{{else}}<span class="dim">not set</span>{{end}}</td></tr>{{end}}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="card">
+  <h3>{{icon "globe"}} Threat Intel API Keys</h3>
+  <table class="tbl"><thead><tr><th>Provider</th><th>Env var</th><th style="text-align:right">Status</th></tr></thead><tbody>
+  {{range .Intel}}<tr><td>{{.Name}}</td><td class="mono dim">{{.Env}}</td><td style="text-align:right">{{if .Set}}<span class="badge sev-low">{{.Masked}}</span>{{else}}<span class="dim">— skipped</span>{{end}}</td></tr>{{end}}
+  </tbody></table>
+</div>
+
+<div class="card">
+  <h3>{{icon "send"}} Notification Channels</h3>
+  <table class="tbl"><tbody>
+  {{range .Notif}}<tr><td>{{.Name}}</td><td class="mono dim">{{.Env}}</td><td style="text-align:right">{{if .Set}}<span class="badge sev-low">configured</span>{{else}}<span class="dim">not set</span>{{end}}</td></tr>{{end}}
+  </tbody></table>
+</div>
+
+<div class="card">
+  <h3>{{icon "shield"}} API Access
+    <span class="sub">· auth {{if .APIAuth}}<span class="badge sev-low">enabled</span>{{else}}<span class="badge sev-info">open</span>{{end}}
+    · audit {{if .AuditOn}}<span class="badge sev-low">on</span>{{else}}<span class="badge sev-info">off</span>{{end}}</span>
+  </h3>
+  <p class="dim" style="font-size:.8rem;margin-top:-6px">Mint a key with <code>obscura --mint-key NAME --mint-role admin</code>. Set <code>API_AUTH_ENABLED=true</code> to enforce Bearer auth on <code>/api/v1/*</code>.</p>
+  {{if .APIKeys}}
+  <table class="tbl"><thead><tr><th>Name</th><th>Role</th><th>Created</th><th>Last used</th><th style="text-align:right">Status</th></tr></thead><tbody>
+  {{range .APIKeys}}<tr><td>{{.Name}}</td><td class="mono">{{.Role}}</td><td class="dim">{{.Created}}</td><td class="dim">{{.LastUsed}}</td><td style="text-align:right">{{if .Active}}<span class="badge sev-low">active</span>{{else}}<span class="badge sev-info">disabled</span>{{end}}</td></tr>{{end}}
+  </tbody></table>
+  {{else}}<p class="muted">No API keys minted.</p>{{end}}
+</div>
+
+{{if .Audit}}
+<div class="card">
+  <h3>{{icon "history"}} Audit Log <span class="sub">recent</span></h3>
+  <table class="tbl"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Path</th><th>IP</th></tr></thead><tbody>
+  {{range .Audit}}<tr><td class="mono dim">{{.When}}</td><td>{{.User}}</td><td class="mono">{{.Action}}</td><td class="mono dim">{{.Details}}</td><td class="mono dim">{{.IP}}</td></tr>{{end}}
+  </tbody></table>
+</div>
+{{end}}
+{{end}}

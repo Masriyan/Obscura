@@ -1,0 +1,41 @@
+{{define "title"}}Obscura Scan — Scheduled{{end}}
+{{define "content"}}
+<div class="page-head"><div><h1>Scheduled Scans</h1><p>Recurring scans dispatched automatically.</p></div></div>
+
+<div class="card">
+  <h2>{{icon "calendar"}} New Schedule</h2>
+  <form method="post" action="/scheduled">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input class="input" type="text" name="target" placeholder="example.com" required style="flex:1;min-width:220px">
+      <input class="input" type="number" name="interval_minutes" value="60" min="1" title="interval (minutes)" style="width:130px">
+      <select class="input" name="mode" style="width:auto">
+        <option value="defensive">Defensive</option>
+        <option value="semi-offensive">Semi-offensive</option>
+      </select>
+      <button class="btn" type="submit">+ Schedule</button>
+    </div>
+    <label class="fld" style="margin:14px 0 6px">Modules</label>
+    <div>{{range .Modules}}<label class="chip" style="cursor:pointer"><input type="checkbox" name="modules" value="{{.Name}}" checked> {{.Name}}</label>{{end}}</div>
+  </form>
+</div>
+
+<div class="card">
+  {{if .Schedules}}
+  <table class="tbl">
+    <thead><tr><th>Target</th><th>Every</th><th>Mode</th><th>Next run</th><th>Last run</th><th></th></tr></thead>
+    <tbody>
+    {{range .Schedules}}
+      <tr>
+        <td>{{.URL}}</td><td>{{.IntervalMinutes}}m</td><td>{{.Mode}}</td>
+        <td class="dim">{{.NextRun}}</td><td class="dim">{{.LastRun}}</td>
+        <td><form method="post" action="/scheduled/delete/{{.ID}}" style="margin:0"><input type="hidden" name="csrf_token" value="{{$.CSRF}}"><button class="btn danger sm">Delete</button></form></td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No scheduled scans. Add one above.</p>
+  {{end}}
+</div>
+{{end}}

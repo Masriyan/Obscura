@@ -1,0 +1,22 @@
+{{define "title"}}Obscura Scan — {{.Name}}{{end}}
+{{define "content"}}
+<div class="page-head">
+  <div><h1>{{.Name}}</h1><p>{{.Done}} / {{.Total}} targets scanned{{if eq .Status "running"}} · running…{{end}}</p></div>
+  <a class="btn ghost sm" href="/campaigns">{{icon "chevron"}} All campaigns</a>
+</div>
+
+<div class="card">
+  <div class="bar"><i style="width:{{if .Total}}{{mulpct .Done .Total}}{{else}}0{{end}}%"></i></div>
+  <table class="tbl"><thead><tr><th>Target</th><th>Risk</th><th>Level</th><th style="text-align:right">Result</th></tr></thead><tbody>
+  {{range .Rows}}
+    <tr>
+      <td class="mono">{{.Target}}</td>
+      <td>{{if .Done}}<span class="mono">{{.Risk}}</span>{{else}}<span class="dim">—</span>{{end}}</td>
+      <td>{{if .Done}}{{sevBadge .Level}}{{else}}<span class="badge sev-medium">scanning…</span>{{end}}</td>
+      <td style="text-align:right">{{if .Done}}<a class="btn ghost sm" href="/view/{{.ScanID}}">View</a>{{else}}<span class="dim">pending</span>{{end}}</td>
+    </tr>
+  {{end}}
+  </tbody></table>
+  {{if eq .Status "running"}}<p class="dim" style="font-size:.8rem;margin-top:10px">Refresh to update progress.</p>{{end}}
+</div>
+{{end}}

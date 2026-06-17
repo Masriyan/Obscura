@@ -1,0 +1,128 @@
+{{define "title"}}Obscura Scan — Results #{{.ScanID}}{{end}}
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>{{.Target}}</h1>
+    <p>Scan #{{.ScanID}} · {{.ScanDate}}{{if .FromCache}} · <span class="badge sev-medium">cached</span>{{end}}</p>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <a class="btn ghost sm" href="/export/pdf/{{.ScanID}}">{{icon "download"}} PDF</a>
+    <a class="btn ghost sm" href="/export/docx/{{.ScanID}}">DOCX</a>
+    <a class="btn ghost sm" href="/export/json/{{.ScanID}}">JSON</a>
+    <a class="btn ghost sm" href="/export/csv/{{.ScanID}}">CSV</a>
+    <a class="btn ghost sm" href="/export/stix/{{.ScanID}}">STIX</a>
+    <a class="btn ghost sm" href="/export/splunk-cim/{{.ScanID}}">Splunk</a>
+    <a class="btn ghost sm" href="/export/qradar-leef/{{.ScanID}}">QRadar</a>
+    <a class="btn ghost sm" href="/export/elastic-ecs/{{.ScanID}}">Elastic</a>
+    <a class="btn ghost sm" href="/graph/{{.ScanID}}">{{icon "globe"}} Graph</a>
+    {{if .PrevScanID}}<a class="btn ghost sm" href="/compare/{{.PrevScanID}}/{{.ScanID}}">⇄ Compare prev</a>{{end}}
+    <a class="btn sm" href="/">{{icon "plus"}} New Scan</a>
+  </div>
+</div>
+
+<!-- Risk overview -->
+<div class="card" style="{{gauge .RiskScore}}">
+  <div class="risk">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="risk-score"><span class="n" style="color:var(--ring)">{{.RiskScore}}</span><span class="d">/100</span></div>
+      {{sevBadge .RiskLevel}}
+    </div>
+    <div class="risk-meta">
+      <div class="dim" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Risk score</div>
+      <div class="meter" style="--mtr:var(--ring)"><i style="width:{{.RiskScore}}%"></i></div>
+      <div class="stats">
+        <div class="s"><b class="st-error">{{.Critical}}</b><span>Critical</span></div>
+        <div class="s"><b style="color:var(--high)">{{.High}}</b><span>High</span></div>
+        <div class="s"><b style="color:var(--med)">{{.Medium}}</b><span>Medium</span></div>
+        <div class="s"><b style="color:var(--low)">{{.Low}}</b><span>Low</span></div>
+        <div class="s"><b>{{.TotalFindings}}</b><span>Total</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Findings overview -->
+{{if .Findings}}
+<div class="card">
+  <h2>{{icon "alert"}} Findings <span class="sub">{{.TotalFindings}}</span></h2>
+  {{range .Findings}}
+  <div class="finding">
+    <div style="flex:none;width:78px">{{sevBadge .Severity}}</div>
+    <div class="body">
+      <div class="title">{{.Title}}</div>
+      {{if .Description}}<div class="desc">{{.Description}}</div>{{end}}
+      <div class="src">{{prettify .Module}}{{if .URL}} · <a href="{{.URL}}" target="_blank" rel="noreferrer noopener">{{.URL}}</a>{{end}}</div>
+    </div>
+  </div>
+  {{end}}
+</div>
+{{else}}
+<div class="card"><span class="muted">✓ No findings of note — the target looks clean for the modules run.</span></div>
+{{end}}
+
+<!-- AI copilot -->
+<div class="card">
+  <div class="mod-head">
+    <div class="name">{{icon "sparkle"}} Obscura Scan AI Copilot</div>
+    <button class="btn sm" onclick="obxAnalyze()">{{icon "sparkle"}} Analyze</button>
+  </div>
+  <div id="ai-analysis" class="muted" style="white-space:pre-wrap"></div>
+  <div id="ai-log" class="chat-log"></div>
+  <div style="display:flex;gap:8px">
+    <input id="ai-q" class="input" placeholder="Ask about these results…" onkeydown="if(event.key==='Enter')obxAsk()">
+    <button class="btn" onclick="obxAsk()">Send</button>
+  </div>
+  <div id="ai-provider" class="dim" style="font-size:.72rem;margin-top:6px"></div>
+</div>
+
+<!-- Analyst notes -->
+<div class="card">
+  <h2>{{icon "clock"}} Notes <span class="sub">{{len .Notes}}</span></h2>
+  {{range .Notes}}
+  <div class="finding" style="align-items:center">
+    <div class="body"><div>{{.Note}}</div><div class="src">{{.Author}} · {{.When}}</div></div>
+    <form method="post" action="/notes/delete/{{.ID}}?scan={{$.ScanID}}" style="margin:0"><input type="hidden" name="csrf_token" value="{{$.CSRF}}"><button class="btn danger sm">Delete</button></form>
+  </div>
+  {{end}}
+  <form method="post" action="/scan/{{.ScanID}}/notes" style="display:flex;gap:8px;margin-top:12px">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <input class="input" name="note" placeholder="Add a note…" required>
+    <button class="btn">Add</button>
+  </form>
+</div>
+
+<!-- Per-module human-readable cards -->
+<h2 style="margin:26px 0 14px;font-size:1.05rem;font-weight:600;letter-spacing:-.01em">Module Results</h2>
+<div class="grid">
+  {{range .Modules}}
+  <div class="card">
+    <div class="mod-head">
+      <div class="name">{{.Pretty}} <span class="badge sev-{{if eq .Status "success"}}low{{else if eq .Status "error"}}critical{{else}}medium{{end}}" style="text-transform:none">{{.Status}}</span></div>
+      <span class="cat-tag">{{.Category}}</span>
+    </div>
+    {{humanize .Data}}
+    <details class="raw"><summary>Raw JSON</summary><pre>{{.RawJSON}}</pre></details>
+  </div>
+  {{end}}
+</div>
+
+<script>
+  const SCAN_ID = {{.ScanID}};
+  async function obxAnalyze(){
+    const el = document.getElementById('ai-analysis'); el.textContent = 'Analyzing…';
+    const r = await fetch('/api/v1/ai/analyze/'+SCAN_ID); const d = await r.json();
+    el.textContent = d.analysis || (d.executive_summary ? (d.executive_summary+'\n\n'+(d.risk_narrative||'')) : JSON.stringify(d,null,2));
+    document.getElementById('ai-provider').textContent = 'provider: '+(d.provider||'?');
+  }
+  async function obxAsk(){
+    const q = document.getElementById('ai-q'); const txt = q.value.trim(); if(!txt) return;
+    const log = document.getElementById('ai-log');
+    const you = document.createElement('div'); you.className='bubble you'; you.textContent = txt; log.appendChild(you); q.value='';
+    const r = await fetch('/api/v1/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:txt}],scan_id:SCAN_ID})});
+    const d = await r.json();
+    const ai = document.createElement('div'); ai.className='bubble ai'; ai.textContent = d.response||''; log.appendChild(ai);
+    document.getElementById('ai-provider').textContent = 'provider: '+(d.provider||'?');
+    log.scrollTop = log.scrollHeight;
+  }
+</script>
+{{end}}

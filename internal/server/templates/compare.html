@@ -1,0 +1,43 @@
+{{define "title"}}Obscura Scan — Compare{{end}}
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Scan Comparison</h1>
+    <p>Diff of findings between two scans.</p>
+  </div>
+  <a class="btn ghost sm" href="/view/{{.B}}">{{icon "chevron"}} Back to scan #{{.B}}</a>
+</div>
+
+<div class="card">
+  <div class="risk" style="gap:50px">
+    <div>
+      <div class="dim" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Baseline · #{{.A}}</div>
+      <div style="margin:6px 0"><span class="mono" style="font-size:1.6rem;font-weight:640">{{.RiskA}}</span> <span class="dim">/100</span></div>
+      <div class="dim" style="font-size:.82rem">{{.ATarget}} · {{.ADate}}</div>
+    </div>
+    <div style="font-size:1.4rem;color:var(--text-4)">{{icon "chevron"}}</div>
+    <div>
+      <div class="dim" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Current · #{{.B}}</div>
+      <div style="margin:6px 0"><span class="mono" style="font-size:1.6rem;font-weight:640">{{.RiskB}}</span> <span class="dim">/100</span>
+        {{if gt .RiskB .RiskA}}<span class="badge sev-high">▲ +{{sub .RiskB .RiskA}}</span>{{else if lt .RiskB .RiskA}}<span class="badge sev-low">▼ {{sub .RiskB .RiskA}}</span>{{else}}<span class="badge sev-info">no change</span>{{end}}
+      </div>
+      <div class="dim" style="font-size:.82rem">{{.BTarget}} · {{.BDate}}</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid cols-2">
+  <div class="card" style="margin-bottom:0">
+    <h3 style="color:var(--high)">{{icon "plus"}} New Findings <span class="sub">{{len .Added}}</span></h3>
+    {{if .Added}}
+      {{range .Added}}<div class="finding"><div style="flex:none;width:74px">{{sevBadge .Severity}}</div><div class="body"><div class="title">{{.Title}}</div><div class="src">{{prettify .Module}}</div></div></div>{{end}}
+    {{else}}<p class="muted">No new findings — nothing regressed.</p>{{end}}
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <h3 style="color:var(--ok)">{{icon "check"}} Resolved Findings <span class="sub">{{len .Removed}}</span></h3>
+    {{if .Removed}}
+      {{range .Removed}}<div class="finding"><div style="flex:none;width:74px">{{sevBadge .Severity}}</div><div class="body"><div class="title">{{.Title}}</div><div class="src">{{prettify .Module}}</div></div></div>{{end}}
+    {{else}}<p class="muted">No findings resolved since the baseline.</p>{{end}}
+  </div>
+</div>
+{{end}}

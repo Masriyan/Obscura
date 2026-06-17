@@ -1,0 +1,49 @@
+{{define "base"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Obscura Scan — Threat Hunter & Attack Surface Management Platform">
+  <title>{{block "title" .}}Obscura Scan{{end}}</title>
+  <link rel="icon" type="image/png" href="/static/img/logo.png">
+  <link rel="stylesheet" href="/static/css/obscura.css">
+  <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js" defer></script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/static/img/logo.png" alt="Obscura Scan">
+        <div class="name">Obscura Scan<small>Threat Hunter</small></div>
+      </div>
+      <nav class="nav">
+        <div class="nav-label">Main</div>
+        <a href="/">{{icon "dashboard"}} Dashboard</a>
+        <a href="/scans">{{icon "history"}} History</a>
+        <a href="/scheduled">{{icon "clock"}} Scheduled</a>
+        <a href="/campaigns">{{icon "target"}} Campaigns</a>
+        <a href="/modules">{{icon "modules"}} Modules</a>
+        <div class="nav-label">System</div>
+        <a href="/settings">{{icon "shield"}} Settings</a>
+        <a href="/healthz">{{icon "health"}} Health</a>
+      </nav>
+      <div class="foot">v{{.Version}} · Security-Life.org</div>
+    </aside>
+    <main class="main">
+      {{block "content" .}}{{end}}
+    </main>
+  </div>
+  <script>
+    // Mark the active nav item.
+    (function(){
+      var p = location.pathname;
+      document.querySelectorAll('.nav a').forEach(function(a){
+        var href = a.getAttribute('href');
+        if (href === p || (href !== '/' && p.indexOf(href) === 0)) a.classList.add('active');
+        else if (href === '/' && p === '/') a.classList.add('active');
+      });
+    })();
+  </script>
+</body>
+</html>{{end}}

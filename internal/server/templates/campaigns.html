@@ -1,0 +1,31 @@
+{{define "title"}}Obscura Scan — Campaigns{{end}}
+{{define "content"}}
+<div class="page-head"><div><h1>Campaigns</h1><p>Scan many targets at once and aggregate the results.</p></div></div>
+
+<div class="card">
+  <h2>{{icon "target"}} New Campaign</h2>
+  <form method="post" action="/campaigns">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <label class="fld">Name</label>
+    <input class="input" name="name" placeholder="Q3 external assets">
+    <label class="fld" style="margin-top:12px">Targets (one per line)</label>
+    <textarea class="input" name="targets" rows="6" placeholder="example.com&#10;test.example.org&#10;10.0.0.0  (needs --allow-internal)" required style="font-family:var(--mono);resize:vertical"></textarea>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
+      <select class="input" name="mode" style="width:auto"><option value="defensive">Defensive</option><option value="semi-offensive">Semi-offensive</option></select>
+      <button class="btn" type="submit">Launch Campaign</button>
+      <span class="dim" style="font-size:.8rem">runs the Quick profile modules per target</span>
+    </div>
+    <input type="hidden" name="modules" value="dns_records"><input type="hidden" name="modules" value="tls">
+    <input type="hidden" name="modules" value="sec_headers"><input type="hidden" name="modules" value="http_probe">
+    <input type="hidden" name="modules" value="tech">
+  </form>
+</div>
+
+<div class="card">
+  {{if .Campaigns}}
+  <table class="tbl"><thead><tr><th>Name</th><th>Targets</th><th>Status</th><th>Created</th></tr></thead><tbody>
+  {{range .Campaigns}}<tr><td><a href="/campaign/{{.ID}}">{{.Name}}</a></td><td class="mono">{{.Count}}</td><td>{{if eq .Status "completed"}}<span class="badge sev-low">completed</span>{{else}}<span class="badge sev-medium">running</span>{{end}}</td><td class="dim">{{.When}}</td></tr>{{end}}
+  </tbody></table>
+  {{else}}<p class="muted">No campaigns yet. Launch one above.</p>{{end}}
+</div>
+{{end}}
