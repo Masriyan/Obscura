@@ -69,24 +69,58 @@ Then enter a target (e.g. `example.com`), pick a profile, and hit **Start Scan**
 ./bin/obscura --allow-internal   # permit private/loopback targets (authorized internal use)
 ```
 
-## Screenshots / what you get
+## Screenshots
 
-```
-┌─ Dashboard ───────────────────────────────────────────────┐
-│  Target: example.com     Profile: [Quick][Full][BugBounty]│
-│  Modules: select all ✓                   [ > Start Scan ] │
-└───────────────────────────────────────────────────────────┘
-┌─ Results ────────────────────────────────────────────────┐
-│   62   Risk / 100   ● High        Crit 0  High 2  Med 2   │
-│   ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁                           │
-│   ⚠ Findings (6)                                          │
-│     HIGH   Missing Content-Security-Policy   sec_headers  │
-│     HIGH   Missing Strict-Transport-Security sec_headers  │
-│   🤖 AI Copilot  [ ✨ Analyze ]   ask about these results…│
-│   Modules: dns_records · tls · sec_headers · tech …       │
-│   [PDF][DOCX][JSON][CSV][STIX][Splunk] [Graph] [Compare]  │
-└──────────────────────────────────────────────────────────┘
-```
+### CLI Startup
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_134855.png" alt="CLI Startup — ASCII banner, configuration loaded, server listening" width="100%">
+</p>
+
+### Dashboard — New Scan
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135114.png" alt="Dashboard — target input, profile selection, 43 module checkboxes, recent scans" width="100%">
+</p>
+
+### Scan Progress (Live SSE)
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135152.png" alt="Live scan progress — 36 modules complete with real-time status badges" width="100%">
+</p>
+
+### Scheduled Scans
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135220.png" alt="Scheduled scans — create recurring scan schedules with module selection" width="100%">
+</p>
+
+### Campaigns
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135233.png" alt="Campaigns — multi-target scanning with aggregated results" width="100%">
+</p>
+
+### Modules Catalog
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135254.png" alt="Modules catalog — 43 recon, intel & analysis modules with descriptions and key requirements (1/2)" width="100%">
+</p>
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135308.png" alt="Modules catalog continued — remaining modules (2/2)" width="100%">
+</p>
+
+### Settings
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135332.png" alt="Settings — application config, AI providers, threat-intel API keys, notification channels" width="100%">
+</p>
+
+### Health API
+
+<p align="center">
+  <img src="assets/screenshot%20CLI%20Obscura/Screenshot_20260621_135347.png" alt="Health endpoint — /healthz JSON response showing status, version, and module count" width="100%">
+</p>
 
 ## Documentation
 
